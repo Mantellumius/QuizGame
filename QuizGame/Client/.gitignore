@@ -477,6 +477,5 @@ $RECYCLE.BIN/
 *.lnk
 
 # Custom
-
-appsettings.json
-appsettings.Development.json
+QuizGame/Server/appsettings.json
+QuizGame/Server/appsettings.Development.json
