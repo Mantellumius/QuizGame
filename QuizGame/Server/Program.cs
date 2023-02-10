@@ -1,4 +1,5 @@
-using Microsoft.AspNetCore.ResponseCompression;
+using BannerlordUnits.IdentityServer.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,7 +7,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
-
+builder.Services.AddDbContext<QuizGameDbContext>(
+    options =>
+    {
+        var connectionString = ConnectionStringBuilder.BuildFrom(
+            builder.Configuration.GetConnectionString("ElephantSQL")!);
+        options.UseNpgsql(connectionString);
+    });
+builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -22,6 +30,9 @@ else
 }
 
 app.UseHttpsRedirection();
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
