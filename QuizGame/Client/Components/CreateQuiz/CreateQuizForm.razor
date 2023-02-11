@@ -1,0 +1,95 @@
+@using System.Net
+@inject HttpClient HttpClient
+
+<MudContainer class="d-flex justify-center align-center">
+    <MudCard Elevation="25" Class="w-75">
+        <MudCardHeader>
+            <MudText Typo="Typo.h3">Create quiz</MudText>
+        </MudCardHeader>
+        <MudForm Model="@_quiz" @ref="@_form" Validation="@(_quizValidator.ValidateValue)" ValidationDelay="1">
+            <MudCardContent>
+                <MudTextField @bind-Value="_quiz.Title"
+                              For="@(() => _quiz.Title)"
+                              Immediate="true"
+                              Label="Title"/>
+                <MudTextField @bind-Value="_quiz.Description"
+                              For="@(() => _quiz.Description)"
+                              Immediate="true"
+                              Label="Description"/>
+                <MudTextField @bind-Value="_quiz.ImageUrl"
+                              For="@(() => _quiz.ImageUrl)"
+                              Immediate="true"
+                              Label="ImageUrl"/>
+            </MudCardContent>
+        </MudForm>
+        <MudCardActions>
+            <MudButtonWithProcessing Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto"
+                                     OnClick="@(async () => await Submit())" Text="Submit"/>
+        </MudCardActions>
+    </MudCard>
+</MudContainer>
+
+@code {
+
+    [Parameter]
+    public ISnackbar Snackbar { get; set; }
+
+    [Parameter]
+    public EventCallback<Guid?> OnSubmit { get; set; }
+
+    private MudForm _form;
+    private readonly QuizFluentValidator _quizValidator = new();
+    private readonly Quiz _quiz = new();
+
+    private async Task Submit()
+    {
+        await _form.Validate();
+
+        if (!_form.IsValid) return;
+        try
+        {
+            _quiz.Id = Guid.NewGuid();
+            var result = await HttpClient.PostAsJsonAsync($"/api/Quizzes", _quiz);
+            if (result.IsSuccessStatusCode)
+            {
+                Snackbar.Add("Submited!");
+                await OnSubmit.InvokeAsync(_quiz.Id);
+            }
+            else
+            {
+                Snackbar.Add("Error!");
+            }
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Error!");
+        }
+    }
+
+    public class QuizFluentValidator : AbstractValidator<Quiz>
+    {
+        public QuizFluentValidator()
+        {
+            RuleFor(x => x.Title)
+                .NotEmpty()
+                .Length(1, 100);
+
+            RuleFor(x => x.Description)
+                .NotEmpty();
+
+            RuleFor(x => x.ImageUrl)
+                .Length(0, 256);
+        }
+
+        public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
+        {
+            var result = await ValidateAsync(ValidationContext<Quiz>.CreateWithOptions(
+                (Quiz)model,
+                x => x.IncludeProperties(propertyName)));
+            return result.IsValid ?
+                Array.Empty<string>() :
+                result.Errors.Select(e => e.ErrorMessage);
+        };
+    }
+
+}

@@ -1,0 +1,25 @@
+@page "/CreateQuiz"
+@attribute [AllowAnonymous]
+@inject HttpClient HttpClient
+@inject ISnackbar Snackbar
+@using QuizGame.Client.Components.CreateQuiz
+
+@if (_quizId is null)
+{
+    <CreateQuizForm Snackbar="Snackbar" OnSubmit="quizId => _quizId = quizId"/>
+}
+else
+{
+    <AddQuestions Snackbar="Snackbar" QuizId="_quizId"/>
+}
+
+@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+    }
+
+    private Guid? _quizId;
+
+
+}

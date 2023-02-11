@@ -5,12 +5,12 @@ namespace QuizGame.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class QuizGameController : ControllerBase
+public class QuizzesController : ControllerBase
 {
-    private readonly ILogger<QuizGameController> _logger;
+    private readonly ILogger<QuizzesController> _logger;
     private readonly QuizGameDbContext _dbContext;
 
-    public QuizGameController(ILogger<QuizGameController> logger, QuizGameDbContext dbContext)
+    public QuizzesController(ILogger<QuizzesController> logger, QuizGameDbContext dbContext)
     {
         _logger = logger;
         _dbContext = dbContext;
@@ -35,12 +35,13 @@ public class QuizGameController : ControllerBase
     {
         var quiz = new Quiz
         {
-            Id = Guid.NewGuid(),
+            Id = quizViewModel.Id,
             Title = quizViewModel.Title,
             Description = quizViewModel.Description,
             ImageUrl = quizViewModel.ImageUrl,
         };
         await _dbContext.Quizzes.AddAsync(quiz);
+        await _dbContext.SaveChangesAsync();
         return Results.Created($"/api/QuizGame/{quiz.Id}", quiz);
     }
 
@@ -66,25 +67,13 @@ public class QuizGameController : ControllerBase
         return Results.Ok();
     }
 
-    [HttpPut("{id}/AddFirstQuestion")]
+    [HttpPut("{id}/AddQuestion")]
     public async Task<IResult> AddQuestion(Guid id, [FromBody] Question question)
     {
         var quiz = await _dbContext.Quizzes.FindAsync(id);
         if (quiz is null) return Results.NoContent();
-
-        if (quiz.FirstQuestion is null || quiz.LastQuestion is null)
-        {
-            quiz.FirstQuestion = question;
-            quiz.LastQuestion = question;
-        }
-        else
-        {
-            quiz.FirstQuestion.Next ??= question;
-            quiz.LastQuestion.Next = question;
-            question.Previous = quiz.LastQuestion;
-            quiz.LastQuestion = question;
-        }
-
+        quiz.Questions.Add(question);
+        _dbContext.Quizzes.Update(quiz);
         await _dbContext.SaveChangesAsync();
         return Results.Ok(quiz);
     }

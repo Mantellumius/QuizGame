@@ -12,8 +12,8 @@ using QuizGame.Server.DataAccess;
 namespace QuizGame.Server.DataAccess.Migrations
 {
     [DbContext(typeof(QuizGameDbContext))]
-    [Migration("20230210150817_doublyLinkedList")]
-    partial class doublyLinkedList
+    [Migration("20230210185840_addQuiz")]
+    partial class addQuiz
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,7 +31,10 @@ namespace QuizGame.Server.DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("QuestionId")
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid?>("QuestionId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Text")
@@ -42,7 +45,7 @@ namespace QuizGame.Server.DataAccess.Migrations
 
                     b.HasIndex("QuestionId");
 
-                    b.ToTable("Answers");
+                    b.ToTable("Answer");
                 });
 
             modelBuilder.Entity("QuizGame.Shared.Models.Question", b =>
@@ -51,7 +54,7 @@ namespace QuizGame.Server.DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("PreviousId")
+                    b.Property<Guid?>("QuizId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Text")
@@ -60,10 +63,9 @@ namespace QuizGame.Server.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PreviousId")
-                        .IsUnique();
+                    b.HasIndex("QuizId");
 
-                    b.ToTable("Questions");
+                    b.ToTable("Question");
                 });
 
             modelBuilder.Entity("QuizGame.Shared.Models.Quiz", b =>
@@ -76,14 +78,8 @@ namespace QuizGame.Server.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("FirstQuestionId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("ImageUrl")
                         .HasColumnType("text");
-
-                    b.Property<Guid?>("LastQuestionId")
-                        .HasColumnType("uuid");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -91,51 +87,31 @@ namespace QuizGame.Server.DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("FirstQuestionId");
-
-                    b.HasIndex("LastQuestionId");
-
                     b.ToTable("Quizzes");
                 });
 
             modelBuilder.Entity("QuizGame.Shared.Models.Answer", b =>
                 {
-                    b.HasOne("QuizGame.Shared.Models.Question", "Question")
-                        .WithMany()
-                        .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Question");
+                    b.HasOne("QuizGame.Shared.Models.Question", null)
+                        .WithMany("Answers")
+                        .HasForeignKey("QuestionId");
                 });
 
             modelBuilder.Entity("QuizGame.Shared.Models.Question", b =>
                 {
-                    b.HasOne("QuizGame.Shared.Models.Question", "Previous")
-                        .WithOne("Next")
-                        .HasForeignKey("QuizGame.Shared.Models.Question", "PreviousId");
+                    b.HasOne("QuizGame.Shared.Models.Quiz", null)
+                        .WithMany("Questions")
+                        .HasForeignKey("QuizId");
+                });
 
-                    b.Navigation("Previous");
+            modelBuilder.Entity("QuizGame.Shared.Models.Question", b =>
+                {
+                    b.Navigation("Answers");
                 });
 
             modelBuilder.Entity("QuizGame.Shared.Models.Quiz", b =>
                 {
-                    b.HasOne("QuizGame.Shared.Models.Question", "FirstQuestion")
-                        .WithMany()
-                        .HasForeignKey("FirstQuestionId");
-
-                    b.HasOne("QuizGame.Shared.Models.Question", "LastQuestion")
-                        .WithMany()
-                        .HasForeignKey("LastQuestionId");
-
-                    b.Navigation("FirstQuestion");
-
-                    b.Navigation("LastQuestion");
-                });
-
-            modelBuilder.Entity("QuizGame.Shared.Models.Question", b =>
-                {
-                    b.Navigation("Next");
+                    b.Navigation("Questions");
                 });
 #pragma warning restore 612, 618
         }

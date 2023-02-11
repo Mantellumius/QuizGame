@@ -1,0 +1,121 @@
+@using System.Net
+@inject HttpClient HttpClient
+
+<MudContainer class="d-flex justify-center align-center">
+    <MudCard Elevation="25" Class="w-75">
+        <MudCardHeader>
+            <MudText Typo="Typo.h3">Add question</MudText>
+        </MudCardHeader>
+        <MudForm Model="@_question" @ref="@_form" Validation="@(_questionValidator.ValidateValue)" ValidationDelay="1" bind-Errors="_errors">
+            <MudCardContent>
+                <MudTextField @bind-Value="_question.Text"
+                              For="@(() => _question.Text)"
+                              Immediate="true"
+                              Label="Text"/>
+                <MudStack Row="true">
+                    <MudTextField @bind-Value="_possibleAnswer.Text"
+                                  For="@(() => _possibleAnswer.Text)"
+                                  Immediate="true"
+                                  Label="PossibleAnswer"/>
+                    <MudSwitch T="bool" Color="Color.Success" @bind-Checked="_possibleAnswer.IsCorrect" For="@(() => _possibleAnswer.IsCorrect)" Label="Is Correct"/>
+                    <MudButton Variant="Variant.Filled" Color="Color.Surface" Class="ml-auto"
+                               OnClick="AddPossibleAnswer">
+                        Add possible answer
+                    </MudButton>
+                </MudStack>
+                <MudText>Possible Answers: </MudText>
+                <MudStack Spacing="2" Justify="Justify.SpaceBetween">
+                    @foreach (var answer in _question.Answers)
+                    {
+                        <MudText>
+                            @answer.Text
+                            @if (answer.IsCorrect)
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.Check"/>
+                            }
+                            <MudButton Color="Color.Transparent" OnClick="() => _question.Answers.Remove(answer)"
+                                       StartIcon="@Icons.Material.Filled.Delete" IconColor="Color.Warning" Size="Size.Small"/>
+                        </MudText>
+                    }
+                </MudStack>
+            </MudCardContent>
+        </MudForm>
+        <MudCardActions>
+            <MudButtonWithProcessing Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto"
+                                     OnClick="@(async () => await Submit())" Text="Submit"/>
+        </MudCardActions>
+    </MudCard>
+</MudContainer>
+
+@code {
+    private string[] _errors = { };
+    private Answer _possibleAnswer = new();
+    private int _numberOfAnswers = 4;
+    private Question _question = new();
+    private MudForm? _form;
+    private readonly QuestionFluentValidator _questionValidator = new();
+
+    [Parameter]
+    public ISnackbar? Snackbar { get; set; }
+
+    [Parameter]
+    public Guid? QuizId { get; set; }
+
+    private void AddPossibleAnswer()
+    {
+        _question.Answers.Add(_possibleAnswer);
+        _possibleAnswer = new Answer();
+    }
+
+    private async Task Submit()
+    {
+        await _form?.Validate()!;
+
+        if (!_form.IsValid) return;
+        try
+        {
+            var result = await HttpClient.PutAsJsonAsync($"/api/Quizzes/{QuizId}/AddQuestion", _question);
+            if (result.IsSuccessStatusCode)
+            {
+                Snackbar?.Add("Question added!");
+                _question = new Question();
+                _possibleAnswer = new Answer();
+            }
+            else
+            {
+                Snackbar?.Add("Error!");
+            }
+        }
+        catch (Exception)
+        {
+            Snackbar?.Add("Error!");
+        }
+    }
+
+    public class QuestionFluentValidator : AbstractValidator<Question>
+    {
+        public QuestionFluentValidator()
+        {
+            RuleFor(x => x.Text)
+                .NotEmpty()
+                .Length(1, 300);
+
+            RuleFor(question => question)
+                .Custom((question, validationContext) =>
+                {
+                    if (question.Answers.Count < 2) validationContext.AddFailure("You have to add at lease two possible answers");
+                    if (question.Answers.Any(answer => answer.IsCorrect)) validationContext.AddFailure("You have to make at least one answer correct");
+                });
+        }
+
+        public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>
+        {
+            var question = (Question)model;
+            var result = await ValidateAsync(ValidationContext<Question>.CreateWithOptions(question, x => x.IncludeProperties(propertyName)));
+            return result.IsValid ?
+                Array.Empty<string>() :
+                result.Errors.Select(e => e.ErrorMessage);
+        };
+    }
+
+}
