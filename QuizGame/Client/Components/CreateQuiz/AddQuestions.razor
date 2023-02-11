@@ -1,58 +1,82 @@
 @using System.Net
 @inject HttpClient HttpClient
-
+@_questions?.FirstOrDefault()?.Answers.Count
 <MudContainer class="d-flex justify-center align-center">
-    <MudCard Elevation="25" Class="w-75">
-        <MudCardHeader>
-            <MudText Typo="Typo.h3">Add question</MudText>
-        </MudCardHeader>
-        <MudForm Model="@_question" @ref="@_form" Validation="@(_questionValidator.ValidateValue)" ValidationDelay="1" bind-Errors="_errors">
-            <MudCardContent>
-                <MudTextField @bind-Value="_question.Text"
-                              For="@(() => _question.Text)"
-                              Immediate="true"
-                              Label="Text"/>
-                <MudStack Row="true">
-                    <MudTextField @bind-Value="_possibleAnswer.Text"
-                                  For="@(() => _possibleAnswer.Text)"
-                                  Immediate="true"
-                                  Label="PossibleAnswer"/>
-                    <MudSwitch T="bool" Color="Color.Success" @bind-Checked="_possibleAnswer.IsCorrect" For="@(() => _possibleAnswer.IsCorrect)" Label="Is Correct"/>
-                    <MudButton Variant="Variant.Filled" Color="Color.Surface" Class="ml-auto"
-                               OnClick="AddPossibleAnswer">
-                        Add possible answer
-                    </MudButton>
-                </MudStack>
-                <MudText>Possible Answers: </MudText>
-                <MudStack Spacing="2" Justify="Justify.SpaceBetween">
-                    @foreach (var answer in _question.Answers)
-                    {
-                        <MudText>
-                            @answer.Text
-                            @if (answer.IsCorrect)
+    <MudStack class="w-100">
+        <MudCard Elevation="25" Class="w-100">
+            <MudCardHeader>
+                <MudText Typo="Typo.h3">Add question</MudText>
+            </MudCardHeader>
+            <MudForm Model="@_question" @ref="@_form" Validation="@(_questionValidator.ValidateValue)" ValidationDelay="1" bind-Errors="_errors">
+                <MudCardContent>
+                    <MudStack Spacing="3">
+                        <MudTextField @bind-Value="_question.Text"
+                                      For="@(() => _question.Text)"
+                                      Immediate="true"
+                                      Label="Text"
+                                      Lines="2"/>
+                        <MudStack Row="true">
+                            <MudTextField @bind-Value="_possibleAnswer.Text"
+                                          For="@(() => _possibleAnswer.Text)"
+                                          Immediate="true"
+                                          Label="PossibleAnswer"/>
+                            <MudSwitch T="bool" Color="Color.Success" @bind-Checked="_possibleAnswer.IsCorrect" For="@(() => _possibleAnswer.IsCorrect)" Label="Is Correct"/>
+                            <MudButton Variant="Variant.Filled" Color="Color.Surface" Class="ml-auto"
+                                       OnClick="AddPossibleAnswer" Size="Size.Small">
+                                Add possible answer
+                            </MudButton>
+                        </MudStack>
+                        <MudText>Possible Answers: </MudText>
+                        <MudStack Spacing="2" Justify="Justify.SpaceBetween">
+                            @for (var i = 0; i < _question.Answers.Count; i++)
                             {
-                                <MudIcon Icon="@Icons.Material.Filled.Check"/>
+                                var i1 = i;
+                                <MudText Color="@GetAnswerColor(_question.Answers[i1].IsCorrect)">
+                                    @($"{i1 + 1}. {_question.Answers[i1].Text}")
+                                    <MudButton Color="Color.Transparent" OnClick="() => _question.Answers.RemoveAt(i1)"
+                                               StartIcon="@Icons.Material.Filled.Delete" IconColor="Color.Warning" Size="Size.Small"/>
+                                </MudText>
                             }
-                            <MudButton Color="Color.Transparent" OnClick="() => _question.Answers.Remove(answer)"
-                                       StartIcon="@Icons.Material.Filled.Delete" IconColor="Color.Warning" Size="Size.Small"/>
-                        </MudText>
-                    }
-                </MudStack>
-            </MudCardContent>
-        </MudForm>
-        <MudCardActions>
-            <MudButtonWithProcessing Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto"
-                                     OnClick="@(async () => await Submit())" Text="Submit"/>
-        </MudCardActions>
-    </MudCard>
+                        </MudStack>
+                    </MudStack>
+                </MudCardContent>
+            </MudForm>
+            <MudCardActions>
+                <MudButtonWithProcessing Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto"
+                                         OnClick="@(async () => await Submit())" Text="Submit"/>
+            </MudCardActions>
+        </MudCard>
+        <MudStack>
+            @if (_questions is not null)
+            {
+                @foreach (var question in _questions)
+                {
+                    <MudCard>
+                        <MudCardHeader>
+                            @question.Text
+                        </MudCardHeader>
+                        <MudCardContent>
+                            <MudStack Row="true" AlignItems="AlignItems.Start">
+                                @for (var i = 0; i < question.Answers.Count; i++)
+                                {
+                                    var i1 = i;
+                                    <MudText Color="GetAnswerColor(question.Answers[i1].IsCorrect)">@($"{i1 + 1}. {question.Answers[i1].Text}")</MudText>
+                                }
+                            </MudStack>
+                        </MudCardContent>
+                    </MudCard>
+                }
+            }
+        </MudStack>
+    </MudStack>
 </MudContainer>
 
 @code {
-    private string[] _errors = { };
+    private List<Question>? _questions;
     private Answer _possibleAnswer = new();
-    private int _numberOfAnswers = 4;
+    private string[] _errors = { };
     private Question _question = new();
-    private MudForm? _form;
+    private MudForm _form = null!;
     private readonly QuestionFluentValidator _questionValidator = new();
 
     [Parameter]
@@ -69,7 +93,7 @@
 
     private async Task Submit()
     {
-        await _form?.Validate()!;
+        await _form.Validate()!;
 
         if (!_form.IsValid) return;
         try
@@ -90,7 +114,10 @@
         {
             Snackbar?.Add("Error!");
         }
+        _questions = (await HttpClient.GetFromJsonAsync<Quiz>($"/api/Quizzes/{QuizId}"))!.Questions;
     }
+
+    private Color GetAnswerColor(bool isCorrect) => isCorrect ? Color.Success : Color.Default;
 
     public class QuestionFluentValidator : AbstractValidator<Question>
     {

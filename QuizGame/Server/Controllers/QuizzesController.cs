@@ -19,14 +19,16 @@ public class QuizzesController : ControllerBase
     [HttpGet]
     public async Task<IResult> GetQuizzes()
     {
-        var result = await _dbContext.Quizzes.ToListAsync();
+        var result = await _dbContext.Quizzes.Include(q => q.Questions).ToListAsync();
         return result.Any() ? Results.Ok(result) : Results.NoContent();
     }
 
     [HttpGet("{id}")]
     public async Task<IResult> GetQuizById([FromRoute] Guid id)
     {
-        var result = await _dbContext.Quizzes.FindAsync(id);
+        var result = await _dbContext.Quizzes.Include(q => q.Questions)!
+            .ThenInclude(q => q.Answers)
+            .FirstAsync(x => x.Id == id);
         return result is not null ? Results.Ok(result) : Results.NoContent();
     }
 

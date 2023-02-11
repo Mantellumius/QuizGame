@@ -10,14 +10,18 @@
             <MudCardContent>
                 <MudTextField @bind-Value="_quiz.Title"
                               For="@(() => _quiz.Title)"
+                              Variant="Variant.Text"
                               Immediate="true"
                               Label="Title"/>
                 <MudTextField @bind-Value="_quiz.Description"
                               For="@(() => _quiz.Description)"
+                              Variant="Variant.Text"
+                              Lines="6"
                               Immediate="true"
                               Label="Description"/>
                 <MudTextField @bind-Value="_quiz.ImageUrl"
                               For="@(() => _quiz.ImageUrl)"
+                              Variant="Variant.Text"
                               Immediate="true"
                               Label="ImageUrl"/>
             </MudCardContent>
@@ -32,12 +36,12 @@
 @code {
 
     [Parameter]
-    public ISnackbar Snackbar { get; set; }
+    public ISnackbar? Snackbar { get; set; }
 
     [Parameter]
     public EventCallback<Guid?> OnSubmit { get; set; }
 
-    private MudForm _form;
+    private MudForm _form = null!;
     private readonly QuizFluentValidator _quizValidator = new();
     private readonly Quiz _quiz = new();
 
@@ -52,17 +56,17 @@
             var result = await HttpClient.PostAsJsonAsync($"/api/Quizzes", _quiz);
             if (result.IsSuccessStatusCode)
             {
-                Snackbar.Add("Submited!");
+                Snackbar?.Add("Submited!");
                 await OnSubmit.InvokeAsync(_quiz.Id);
             }
             else
             {
-                Snackbar.Add("Error!");
+                Snackbar?.Add("Error!");
             }
         }
         catch (Exception)
         {
-            Snackbar.Add("Error!");
+            Snackbar?.Add("Error!");
         }
     }
 
