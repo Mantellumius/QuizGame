@@ -1,6 +1,35 @@
 @page "/List"
-<h3>List</h3>
+@inject HttpClient HttpClient
+@if (_quizzes is null)
+{
+    <MudText Typo="Typo.caption">Loading...</MudText>
+}
+else
+{
+    <MudGrid Class="p-4 " Style="width: fit-content">
+        @foreach (var quiz in _quizzes)
+        {
+            <MudItem xs="3">
+                <MudCard Elevation="4">
+                    <MudCardHeader>
+                        <MudNavLink Href=@($"PlayQuiz/{quiz.Id}")>@quiz.Title</MudNavLink>
+                    </MudCardHeader>
+                    <MudCardMedia Image="@quiz.ImageUrl" Height="300"/>
+                    <MudCardContent>
+                        @quiz.Description
+                    </MudCardContent>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+}
 
 @code {
-    
+    private Quiz[]? _quizzes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _quizzes = await HttpClient.GetFromJsonAsync<Quiz[]>("api/Quizzes");
+    }
+
 }

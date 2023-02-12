@@ -1,0 +1,25 @@
+@page "/PlayQuiz/{Id}"
+@inject HttpClient HttpClient
+
+@if (_quiz is null)
+{
+    <MudText>Loading...</MudText>
+}
+else
+{
+    <MudText>@_quiz.Title</MudText>
+}
+
+@code {
+
+    [Parameter]
+    public string Id { get; set; }
+
+    private Quiz? _quiz;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _quiz = await HttpClient.GetFromJsonAsync<Quiz>($"api/Quizzes/{new Guid(Id)}");
+    }
+
+}

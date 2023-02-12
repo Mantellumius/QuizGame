@@ -1,23 +1,23 @@
 ﻿@inherits LayoutComponentBase
 
-<MudThemeProvider/>
+<MudThemeProvider Theme="_currentTheme"/>
 <MudDialogProvider/>
 <MudSnackbarProvider/>
 
 <MudLayout>
-    <MudAppBar>
-        Quiz game
-    </MudAppBar>
+    <AppBar OnThemeToggled="ToggleTheme"/>
 
-    <MudDrawer @bind-Open="@_drawerOpen" Elevation="1" Variant="@DrawerVariant.Mini"OpenMiniOnHover="true">
+    <MudDrawer @bind-Open="@_drawerOpen" Elevation="1" Variant="@DrawerVariant.Mini" OpenMiniOnHover="true">
         <NavMenu/>
     </MudDrawer>
-    <MudMainContent>
+    <MudMainContent Class="pt-16 px-16">
         @Body
     </MudMainContent>
 </MudLayout>
 
+
 @code {
     bool _drawerOpen;
-
+    private MudTheme _currentTheme = new();
+    private void ToggleTheme(MudTheme changedTheme) => _currentTheme = changedTheme;
 }

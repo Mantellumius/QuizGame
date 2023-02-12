@@ -1,8 +1,6 @@
-@page "/CreateQuiz"
-@attribute [AllowAnonymous]
-@inject HttpClient HttpClient
-@inject ISnackbar Snackbar
 @using QuizGame.Client.Components.CreateQuiz
+@page "/CreateQuiz"
+@inject ISnackbar Snackbar
 
 @if (_quizId is null)
 {

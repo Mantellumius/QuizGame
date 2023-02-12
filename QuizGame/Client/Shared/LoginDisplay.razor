@@ -1,0 +1,27 @@
+﻿@* @inject NavigationManager Navigation *@
+@* *@
+@* <MudStack Row="true"> *@
+@*     <AuthorizeView> *@
+@*         <Authorized> *@
+@*             <MudText Color="Color.Inherit" >Hello, @context.User.Identity?.Name!</MudText> *@
+@*             <MudNavLink Icon="@Icons.Material.Filled.Logout" IconColor="Color.Inherit" OnClick="BeginLogOut">Log out</MudNavLink> *@
+@*         </Authorized> *@
+@*         <NotAuthorized> *@
+@*             <MudNavLink Icon="@Icons.Material.TwoTone.Login" IconColor="Color.Inherit" class="d-inline" OnClick="BeginLogIn">Login</MudNavLink> *@
+@*         </NotAuthorized> *@
+@*     </AuthorizeView> *@
+@* </MudStack> *@
+@* *@
+@* @code{ *@
+@* *@
+@*     private void BeginLogOut() *@
+@*     { *@
+@*         Navigation.NavigateToLogout("Authentication/Logout"); *@
+@*     } *@
+@* *@
+@*     private void BeginLogIn() *@
+@*     { *@
+@*         Navigation.NavigateToLogout("Authentication/Login"); *@
+@*     } *@
+@* *@
+@* } *@

@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Http.HttpResults;
-using QuizGame.Shared.Models;
-
 namespace QuizGame.Server.Controllers;
 
 [ApiController]
@@ -74,7 +71,18 @@ public class QuizzesController : ControllerBase
     {
         var quiz = await _dbContext.Quizzes.FindAsync(id);
         if (quiz is null) return Results.NoContent();
-        quiz.Questions.Add(question);
+        quiz.Questions?.Add(question);
+        _dbContext.Quizzes.Update(quiz);
+        await _dbContext.SaveChangesAsync();
+        return Results.Ok(quiz);
+    }
+    
+    [HttpPut("{id}/SetQuestions")]
+    public async Task<IResult> SetQuestions(Guid id, [FromBody] List<Question> questions)
+    {
+        var quiz = await _dbContext.Quizzes.FindAsync(id);
+        if (quiz is null) return Results.NoContent();
+        quiz.Questions = questions;
         _dbContext.Quizzes.Update(quiz);
         await _dbContext.SaveChangesAsync();
         return Results.Ok(quiz);
