@@ -27,7 +27,7 @@
 
     protected override void OnInitialized()
     {
-        _answers = Question.Answers 
+        _answers = Question.Answers
             .Select(AnswerViewModel.CreateFromModel)
             .ToList()
             .Shuffle();

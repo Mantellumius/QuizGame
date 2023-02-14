@@ -19,5 +19,10 @@
 @code {
     bool _drawerOpen;
     private MudTheme _currentTheme = new();
-    private void ToggleTheme(MudTheme changedTheme) => _currentTheme = changedTheme;
+
+    private void ToggleTheme(MudTheme changedTheme)
+    {
+        _currentTheme = changedTheme;
+    }
+
 }

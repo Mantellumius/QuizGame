@@ -4,8 +4,8 @@ namespace QuizGame.Server.Controllers;
 [Route("api/[controller]")]
 public class QuizzesController : ControllerBase
 {
-    private readonly ILogger<QuizzesController> _logger;
     private readonly QuizGameDbContext _dbContext;
+    private readonly ILogger<QuizzesController> _logger;
 
     public QuizzesController(ILogger<QuizzesController> logger, QuizGameDbContext dbContext)
     {
@@ -37,7 +37,7 @@ public class QuizzesController : ControllerBase
             Id = quizViewModel.Id,
             Title = quizViewModel.Title,
             Description = quizViewModel.Description,
-            ImageUrl = quizViewModel.ImageUrl,
+            ImageUrl = quizViewModel.ImageUrl
         };
         await _dbContext.Quizzes.AddAsync(quiz);
         await _dbContext.SaveChangesAsync();
@@ -76,7 +76,7 @@ public class QuizzesController : ControllerBase
         await _dbContext.SaveChangesAsync();
         return Results.Ok(quiz);
     }
-    
+
     [HttpPut("{id}/SetQuestions")]
     public async Task<IResult> SetQuestions(Guid id, [FromBody] List<Question> questions)
     {

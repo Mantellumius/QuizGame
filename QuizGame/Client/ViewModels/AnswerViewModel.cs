@@ -8,6 +8,9 @@ public class AnswerViewModel
     public bool IsCorrect { get; set; }
     public bool IsSelected { get; set; }
 
-    public static AnswerViewModel CreateFromModel(Answer answer) => new()
-        { Text = answer.Text, IsCorrect = answer.IsCorrect, IsSelected = false };
+    public static AnswerViewModel CreateFromModel(Answer answer)
+    {
+        return new()
+            { Text = answer.Text, IsCorrect = answer.IsCorrect, IsSelected = false };
+    }
 }

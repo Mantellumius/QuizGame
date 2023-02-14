@@ -1,5 +1,3 @@
-@using System.Net
-@using FluentValidation.Results
 @inject HttpClient HttpClient
 @inject NavigationManager NavigationManager
 
@@ -118,7 +116,10 @@
         }
     }
 
-    private Color GetAnswerColor(bool isCorrect) => isCorrect ? Color.Success : Color.Default;
+    private Color GetAnswerColor(bool isCorrect)
+    {
+        return isCorrect ? Color.Success : Color.Default;
+    }
 
     private IEnumerable<string> IsAnswersCorrect(string pw)
     {

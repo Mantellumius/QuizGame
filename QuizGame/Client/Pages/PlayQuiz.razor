@@ -33,6 +33,7 @@ else
     private IEnumerator<Question>? _questionsEnumerator;
     private bool _isFinished;
     private int _correctAnswersCount;
+
     protected override async Task OnInitializedAsync()
     {
         _quiz = await HttpClient.GetFromJsonAsync<Quiz>($"api/Quizzes/{new Guid(Id)}");

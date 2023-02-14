@@ -52,7 +52,7 @@
         try
         {
             _quiz.Id = Guid.NewGuid();
-            var result = await HttpClient.PostAsJsonAsync($"/api/Quizzes", _quiz);
+            var result = await HttpClient.PostAsJsonAsync("/api/Quizzes", _quiz);
             if (result.IsSuccessStatusCode)
             {
                 Snackbar?.Add("Submited!");
