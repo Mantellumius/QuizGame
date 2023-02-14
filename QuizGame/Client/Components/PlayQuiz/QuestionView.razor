@@ -1,0 +1,55 @@
+@using QuizGame.Client.ExtensionMethods
+<MudStack AlignItems="AlignItems.Center">
+    <MudText Typo="Typo.h5">@Question.Text</MudText>
+    <MudGrid Justify="Justify.Center" Spacing="4">
+        @foreach (var answer in _answers)
+        {
+            <MudItem xs="6">
+                <MudButton Variant="Variant.Filled" Color="GetButtonColor(answer)" OnClick="@(() => OnAnswerSelected(answer))"
+                           ButtonType="ButtonType.Button" Size="Size.Large" Disabled="@IsButtonDisabled(answer)" FullWidth="true">
+                    @answer.Text
+                </MudButton>
+            </MudItem>
+        }
+    </MudGrid>
+</MudStack>
+
+@code {
+
+    [Parameter]
+    public Question Question { get; set; } = null!;
+
+    [Parameter]
+    public EventCallback<bool> OnAnswered { get; set; }
+
+    private IList<AnswerViewModel> _answers = null!;
+    private bool _answered = false;
+
+    protected override void OnInitialized()
+    {
+        _answers = Question.Answers 
+            .Select(AnswerViewModel.CreateFromModel)
+            .ToList()
+            .Shuffle();
+    }
+
+    private void OnAnswerSelected(AnswerViewModel answerViewModel)
+    {
+        answerViewModel.IsSelected = true;
+        _answered = true;
+        OnAnswered.InvokeAsync(answerViewModel.IsCorrect);
+    }
+
+    private Color GetButtonColor(AnswerViewModel answerViewModel)
+    {
+        if (!_answered) return Color.Default;
+        return answerViewModel.IsCorrect ? Color.Success : Color.Error;
+    }
+
+    private bool IsButtonDisabled(AnswerViewModel answerViewModel)
+    {
+        if (answerViewModel.IsSelected || answerViewModel.IsCorrect) return false;
+        return _answered;
+    }
+
+}

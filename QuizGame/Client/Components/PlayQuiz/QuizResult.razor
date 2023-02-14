@@ -1,0 +1,12 @@
+<MudText>Results</MudText>
+<MudText>You answered @TotalCorrectAnswers questions out of @TotalQuestions correctly</MudText>
+
+@code {
+
+    [Parameter]
+    public int TotalQuestions { get; set; }
+
+    [Parameter]
+    public int TotalCorrectAnswers { get; set; }
+
+}

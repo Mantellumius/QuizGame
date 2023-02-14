@@ -1,13 +1,27 @@
 @page "/PlayQuiz/{Id}"
+@using QuizGame.Client.Components.PlayQuiz
 @inject HttpClient HttpClient
-
+@inject ISnackbar Snackbar;
 @if (_quiz is null)
 {
     <MudText>Loading...</MudText>
 }
 else
 {
-    <MudText>@_quiz.Title</MudText>
+    <MudContainer Class="d-flex justify-center align-center mt-5">
+        <MudStack AlignItems="AlignItems.Center">
+            <MudText Typo="Typo.h3">@_quiz.Title</MudText>
+            <MudSpacer/>
+            @if (_isFinished)
+            {
+                <QuizResult TotalQuestions="_quiz.Questions!.Count" TotalCorrectAnswers="_correctAnswersCount"/>
+            }
+            else
+            {
+                <QuestionView Question="@_questionsEnumerator?.Current" OnAnswered="OnAnswered"/>
+            }
+        </MudStack>
+    </MudContainer>
 }
 
 @code {
@@ -16,10 +30,27 @@ else
     public string Id { get; set; }
 
     private Quiz? _quiz;
-
+    private IEnumerator<Question>? _questionsEnumerator;
+    private bool _isFinished;
+    private int _correctAnswersCount;
     protected override async Task OnInitializedAsync()
     {
         _quiz = await HttpClient.GetFromJsonAsync<Quiz>($"api/Quizzes/{new Guid(Id)}");
+        if (_quiz is null)
+        {
+            Snackbar.Add("Unknown quiz");
+            return;
+        }
+        _questionsEnumerator = _quiz.Questions?.GetEnumerator()!;
+        _questionsEnumerator.MoveNext();
+    }
+
+    private async void OnAnswered(bool isCorrectAnswer)
+    {
+        await Task.Delay(1000);
+        if (isCorrectAnswer) _correctAnswersCount++;
+        if (!_questionsEnumerator!.MoveNext()) _isFinished = true;
+        StateHasChanged();
     }
 
 }
