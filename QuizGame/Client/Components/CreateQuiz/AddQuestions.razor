@@ -54,18 +54,29 @@
             @foreach (var question in _questions)
             {
                 <MudCard>
-                    <MudCardHeader>
-                        @question.Text
-                    </MudCardHeader>
-                    <MudCardContent>
-                        <MudStack Row="@true" AlignItems="@AlignItems.Start">
-                            @for (var i = 0; i < question.Answers.Count; i++)
-                            {
-                                var i1 = i;
-                                <MudText Color="@GetAnswerColor(question.Answers[i1].IsCorrect)">@($"{i1 + 1}. {question.Answers[i1].Text}")</MudText>
-                            }
+                    <MudStack Row="true" Justify="Justify.SpaceBetween">
+                        <MudContainer>
+                            <MudCardHeader>
+                                @question.Text
+                                <MudIconButton OnClick="() => EditQuestion(question)" Icon="@Icons.Material.Filled.Edit" Color="Color.Info"></MudIconButton>
+                            </MudCardHeader>
+                            <MudCardContent>
+                                <MudStack Row="true" AlignItems="@AlignItems.Start">
+                                    @for (var i = 0; i < question.Answers.Count; i++)
+                                    {
+                                        var i1 = i;
+                                        <MudText Color="@GetAnswerColor(question.Answers[i1].IsCorrect)">
+                                            @($"{i1 + 1}. {question.Answers[i1].Text}")
+                                        </MudText>
+                                    }
+                                </MudStack>
+                            </MudCardContent>
+                        </MudContainer>
+                        <MudStack Justify="Justify.SpaceBetween" class="p-3">
+                            <MudIconButton  Size="Size.Medium" Icon="@Icons.Material.Filled.ArrowUpward" OnClick="() => MoveQuestionUp(question)" ButtonType="ButtonType.Button" />
+                            <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.ArrowDownward" OnClick="() => MoveQuestionDown(question)" ButtonType="ButtonType.Button"/>
                         </MudStack>
-                    </MudCardContent>
+                    </MudStack>
                 </MudCard>
             }
         </MudStack>
@@ -97,9 +108,16 @@
         if (!_form.IsValid) return;
 
         _questions.Add(new Question { Text = _question.Text, Answers = new List<Answer>(_question.Answers) });
+
         Snackbar?.Add("Question added!");
         _question = new Question();
         _possibleAnswer = new Answer();
+    }
+
+    private void EditQuestion(Question question)
+    {
+        _question = question;
+        _questions.Remove(question);
     }
 
     private async Task SubmitQuestions()
@@ -116,10 +134,6 @@
         }
     }
 
-    private Color GetAnswerColor(bool isCorrect)
-    {
-        return isCorrect ? Color.Success : Color.Default;
-    }
 
     private IEnumerable<string> IsAnswersCorrect(string pw)
     {
@@ -127,6 +141,27 @@
             yield return "You have to add at least two possible answers";
         if (_question.Answers.Count(answer => answer.IsCorrect) != 1)
             yield return "Should be only one correct answer";
+    }
+
+    private Color GetAnswerColor(bool isCorrect)
+    {
+        return isCorrect ? Color.Success : Color.Default;
+    }
+
+    private void MoveQuestionUp(Question question)
+    {
+        if (_questions.Count == 1) return;
+        var indexOfTargetQuestion = _questions.IndexOf(question);
+        var indexOfQuestionBeforeTarget = (indexOfTargetQuestion - 1) % _questions.Count;
+        (_questions[indexOfQuestionBeforeTarget], _questions[indexOfTargetQuestion]) = (_questions[indexOfTargetQuestion], _questions[indexOfQuestionBeforeTarget]);
+    }
+
+    private void MoveQuestionDown(Question question)
+    {
+        if (_questions.Count == 1) return;
+        var indexOfTargetQuestion = _questions.IndexOf(question);
+        var indexOfQuestionAfterTarget = (indexOfTargetQuestion + 1) % _questions.Count;
+        (_questions[indexOfQuestionAfterTarget], _questions[indexOfTargetQuestion]) = (_questions[indexOfTargetQuestion], _questions[indexOfQuestionAfterTarget]);
     }
 
 }

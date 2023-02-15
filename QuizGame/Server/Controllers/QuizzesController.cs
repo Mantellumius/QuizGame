@@ -17,7 +17,7 @@ public class QuizzesController : ControllerBase
     public async Task<IResult> GetQuizzes()
     {
         var result = await _dbContext.Quizzes.Include(q => q.Questions).ToListAsync();
-        return result.Any() ? Results.Ok(result) : Results.NoContent();
+        return Results.Ok(result);
     }
 
     [HttpGet("{id}")]
