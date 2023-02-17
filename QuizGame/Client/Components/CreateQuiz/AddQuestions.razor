@@ -1,4 +1,4 @@
-@inject HttpClient HttpClient
+@using QuizGame.Client.Services
 @inject NavigationManager NavigationManager
 
 <MudContainer class="d-flex justify-center align-center mt-5">
@@ -73,7 +73,7 @@
                             </MudCardContent>
                         </MudContainer>
                         <MudStack Justify="Justify.SpaceBetween" class="p-3">
-                            <MudIconButton  Size="Size.Medium" Icon="@Icons.Material.Filled.ArrowUpward" OnClick="() => MoveQuestionUp(question)" ButtonType="ButtonType.Button" />
+                            <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.ArrowUpward" OnClick="() => MoveQuestionUp(question)" ButtonType="ButtonType.Button"/>
                             <MudIconButton Size="Size.Medium" Icon="@Icons.Material.Filled.ArrowDownward" OnClick="() => MoveQuestionDown(question)" ButtonType="ButtonType.Button"/>
                         </MudStack>
                     </MudStack>
@@ -95,6 +95,9 @@
 
     [Parameter]
     public Guid? QuizId { get; set; }
+
+    [Parameter]
+    public QuizService QuizService { get; set; } = null!;
 
     private void AddPossibleAnswer()
     {
@@ -122,7 +125,7 @@
 
     private async Task SubmitQuestions()
     {
-        var result = await HttpClient.PutAsJsonAsync($"/api/Quizzes/{QuizId}/SetQuestions", _questions);
+        var result = await QuizService.AddQuestions(QuizId, _questions);
         if (result.IsSuccessStatusCode)
         {
             Snackbar?.Add("Quiz finished!");

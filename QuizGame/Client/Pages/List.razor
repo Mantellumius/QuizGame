@@ -6,18 +6,21 @@
 }
 else
 {
-    <MudGrid Class="p-4 " Style="width: fit-content">
+    <MudGrid Class="p-4 " Style="width: 100%">
         @foreach (var quiz in _quizzes)
         {
             <MudItem xs="3">
                 <MudCard Elevation="4">
                     <MudCardHeader>
-                        <MudNavLink Href=@($"PlayQuiz/{quiz.Id}")>@quiz.Title</MudNavLink>
+                        <MudText Typo="Typo.h5">@quiz.Title</MudText>
                     </MudCardHeader>
-                    <MudCardMedia Image="@quiz.ImageUrl" Height="300"/>
+                    <MudCardMedia Image="@(quiz.ImageUrl ?? "images/no_image.png")" Height="350"/>
                     <MudCardContent>
-                        @quiz.Description
+                        @($"{quiz.Description[..Math.Min(quiz.Description.Length, 100)]}{(quiz.Description.Length > 100 ? "..." : "")}")
                     </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Variant="Variant.Text" Color="Color.Primary" Href=@($"PlayQuiz/{quiz.Id}") Size="Size.Large">Play</MudButton>
+                    </MudCardActions>
                 </MudCard>
             </MudItem>
         }

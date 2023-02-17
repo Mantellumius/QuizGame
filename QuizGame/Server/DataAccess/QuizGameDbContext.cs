@@ -2,7 +2,7 @@ namespace QuizGame.Server.DataAccess;
 
 public class QuizGameDbContext : DbContext
 {
-    public QuizGameDbContext(DbContextOptions options) : base(options)
+    public QuizGameDbContext(DbContextOptions<QuizGameDbContext> options) : base(options)
     {
     }
 

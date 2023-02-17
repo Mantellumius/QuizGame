@@ -20,7 +20,7 @@ public class QuizzesController : ControllerBase
         return Results.Ok(result);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     public async Task<IResult> GetQuizById([FromRoute] Guid id)
     {
         var result = await _dbContext.Quizzes.Include(q => q.Questions)!
@@ -29,11 +29,13 @@ public class QuizzesController : ControllerBase
         return result is not null ? Results.Ok(result) : Results.NoContent();
     }
 
+    [Authorize]
     [HttpPost]
     public async Task<IResult> Post([FromBody] QuizViewModel quizViewModel)
     {
         var quiz = new Quiz
         {
+            AuthorId = quizViewModel.AuthorId,
             Id = quizViewModel.Id,
             Title = quizViewModel.Title,
             Description = quizViewModel.Description,
@@ -44,7 +46,8 @@ public class QuizzesController : ControllerBase
         return Results.Created($"/api/QuizGame/{quiz.Id}", quiz);
     }
 
-    [HttpPut("{id}")]
+    [Authorize]
+    [HttpPut("{id:guid}")]
     public async Task<IResult> Put(Guid id, [FromBody] QuizViewModel quizViewModel)
     {
         var quiz = await _dbContext.Quizzes.FindAsync(id);
@@ -56,7 +59,8 @@ public class QuizzesController : ControllerBase
         return Results.Ok(quiz);
     }
 
-    [HttpDelete("{id}")]
+    [Authorize]
+    [HttpDelete("{id:guid}")]
     public async Task<IResult> Delete(Guid id)
     {
         var quiz = await _dbContext.Quizzes.FindAsync(id);
@@ -66,7 +70,8 @@ public class QuizzesController : ControllerBase
         return Results.Ok();
     }
 
-    [HttpPut("{id}/AddQuestion")]
+    [Authorize]
+    [HttpPut("{id:guid}/AddQuestion")]
     public async Task<IResult> AddQuestion(Guid id, [FromBody] Question question)
     {
         var quiz = await _dbContext.Quizzes.FindAsync(id);
@@ -77,7 +82,8 @@ public class QuizzesController : ControllerBase
         return Results.Ok(quiz);
     }
 
-    [HttpPut("{id}/SetQuestions")]
+    [Authorize]
+    [HttpPut("{id:guid}/SetQuestions")]
     public async Task<IResult> SetQuestions(Guid id, [FromBody] List<Question> questions)
     {
         var quiz = await _dbContext.Quizzes.FindAsync(id);

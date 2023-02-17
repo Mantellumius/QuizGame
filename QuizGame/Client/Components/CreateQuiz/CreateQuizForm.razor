@@ -1,4 +1,4 @@
-@inject HttpClient HttpClient
+@using QuizGame.Client.Services
 
 <MudContainer class="d-flex justify-center align-center mt-5">
     <MudCard Elevation="25" Class="w-75">
@@ -40,6 +40,9 @@
     [Parameter]
     public EventCallback<Guid?> OnSubmit { get; set; }
 
+    [Parameter]
+    public QuizService QuizService { get; set; } = null!;
+
     private MudForm _form = null!;
     private readonly QuizFluentValidator _quizValidator = new();
     private readonly Quiz _quiz = new();
@@ -47,23 +50,15 @@
     private async Task Submit()
     {
         await _form.Validate();
-
         if (!_form.IsValid) return;
-        try
+
+        var result = await QuizService.CreateQuiz(_quiz);
+        if (result.IsSuccessStatusCode)
         {
-            _quiz.Id = Guid.NewGuid();
-            var result = await HttpClient.PostAsJsonAsync("/api/Quizzes", _quiz);
-            if (result.IsSuccessStatusCode)
-            {
-                Snackbar?.Add("Submited!");
-                await OnSubmit.InvokeAsync(_quiz.Id);
-            }
-            else
-            {
-                Snackbar?.Add("Error!");
-            }
+            Snackbar?.Add("Submitted!");
+            await OnSubmit.InvokeAsync(_quiz.Id);
         }
-        catch (Exception)
+        else
         {
             Snackbar?.Add("Error!");
         }

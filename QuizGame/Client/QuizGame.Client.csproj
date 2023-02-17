@@ -7,14 +7,18 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FluentValidation" Version="11.4.0"/>
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.2"/>
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.2" PrivateAssets="all"/>
-        <PackageReference Include="MudBlazor" Version="6.1.8"/>
+        <PackageReference Include="Blazored.LocalStorage" Version="4.3.0" />
+        <PackageReference Include="FluentValidation" Version="11.4.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="7.0.3" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.3" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="7.0.3" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.2" PrivateAssets="all" />
+        <PackageReference Include="MudBlazor" Version="6.1.8" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.26.1" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Shared\QuizGame.Shared.csproj"/>
+        <ProjectReference Include="..\Shared\QuizGame.Shared.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,27 +1,53 @@
-﻿@* @inject NavigationManager Navigation *@
-@* *@
-@* <MudStack Row="true"> *@
-@*     <AuthorizeView> *@
-@*         <Authorized> *@
-@*             <MudText Color="Color.Inherit" >Hello, @context.User.Identity?.Name!</MudText> *@
-@*             <MudNavLink Icon="@Icons.Material.Filled.Logout" IconColor="Color.Inherit" OnClick="BeginLogOut">Log out</MudNavLink> *@
-@*         </Authorized> *@
-@*         <NotAuthorized> *@
-@*             <MudNavLink Icon="@Icons.Material.TwoTone.Login" IconColor="Color.Inherit" class="d-inline" OnClick="BeginLogIn">Login</MudNavLink> *@
-@*         </NotAuthorized> *@
-@*     </AuthorizeView> *@
-@* </MudStack> *@
-@* *@
-@* @code{ *@
-@* *@
-@*     private void BeginLogOut() *@
-@*     { *@
-@*         Navigation.NavigateToLogout("Authentication/Logout"); *@
-@*     } *@
-@* *@
-@*     private void BeginLogIn() *@
-@*     { *@
-@*         Navigation.NavigateToLogout("Authentication/Login"); *@
-@*     } *@
-@* *@
-@* } *@
+﻿@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using QuizGame.Client.Providers
+@using Blazored.LocalStorage
+@inject NavigationManager Navigation
+
+<MudStack Row="true">
+    <AuthorizeView>
+        <Authorized>
+            <MudText Color="Color.Inherit">Hello, @context.User.Identity?.Name!</MudText>
+            <MudNavLink Icon="@Icons.Material.Filled.Logout" IconColor="Color.Inherit" OnClick="BeginLogOut">Log out</MudNavLink>
+        </Authorized>
+        <NotAuthorized>
+            <MudNavLink Icon="@Icons.Material.TwoTone.Login" IconColor="Color.Inherit" class="d-inline" OnClick="BeginLogIn">Login</MudNavLink>
+            <MudNavLink Icon="@Icons.Material.TwoTone.Login" IconColor="Color.Inherit" class="d-inline" OnClick="BeginRegister">Register</MudNavLink>
+        </NotAuthorized>
+    </AuthorizeView>
+</MudStack>
+
+@code{
+
+    [Inject]
+    ILocalStorageService LocalStorageService { get; set; }
+
+    [Inject]
+    AuthenticationStateProvider AuthenticationStateProvider { get; set; }
+
+    [Inject]
+    NavigationManager NavigationManager { get; set; }
+
+    private async Task BeginLogOut()
+    {
+        if (await LocalStorageService.ContainKeyAsync("bearerToken"))
+        {
+            await LocalStorageService.RemoveItemAsync("bearerToken");
+            ((AppAuthenticationStateProvider)AuthenticationStateProvider).SignOut();
+        }
+
+        StateHasChanged();
+        NavigationManager.NavigateTo("/");
+        // Navigation.NavigateTo("Authentication/Logout");
+    }
+
+    private void BeginLogIn()
+    {
+        Navigation.NavigateToLogin("Authentication/Login");
+    }
+
+    private void BeginRegister()
+    {
+        Navigation.NavigateToLogin("Authentication/Register");
+    }
+
+}
