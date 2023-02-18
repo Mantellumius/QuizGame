@@ -1,0 +1,38 @@
+@page "/EditQuiz/{Id}"
+@attribute [Authorize]
+@inject ISnackbar Snackbar
+@inject QuizService QuizService
+
+@if (_quiz is not null)
+{
+    if (!_isQuizFormSubmitted)
+    {
+        <EditQuizForm Snackbar="Snackbar" OnSubmit="OnQuizFormSubmit" Quiz="_quiz" QuizService="QuizService"/>
+    }
+    else
+    {
+        <SetQuestionsForm Snackbar="Snackbar" QuizId="_quizId" QuizService="QuizService"/>
+    }
+}
+
+@code {
+
+    [Parameter]
+    public string? Id { get; set; }
+
+    private Guid _quizId;
+    private Quiz? _quiz;
+    private bool _isQuizFormSubmitted;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _quiz = await QuizService.GetQuiz(Id!) ?? new Quiz();
+    }
+
+    private void OnQuizFormSubmit()
+    {
+        _quizId = Guid.Parse(Id!);
+        _isQuizFormSubmitted = true;
+    }
+
+}

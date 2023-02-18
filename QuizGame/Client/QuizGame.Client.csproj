@@ -21,4 +21,8 @@
         <ProjectReference Include="..\Shared\QuizGame.Shared.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Components\Profile\MyQizzes.razor" />
+    </ItemGroup>
+
 </Project>

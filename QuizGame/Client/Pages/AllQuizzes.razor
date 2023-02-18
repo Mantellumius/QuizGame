@@ -1,0 +1,39 @@
+@page "/AllQuizzes"
+@inject QuizService QuizService
+
+@if (_quizzes is null)
+{
+    <MudText Typo="Typo.caption">Loading...</MudText>
+}
+else
+{
+    <MudGrid Class="p-4 " Style="width: 100%">
+        @foreach (var quiz in _quizzes)
+        {
+            <MudItem xs="3">
+                <MudCard Elevation="4">
+                    <MudCardHeader>
+                        <MudText Typo="Typo.h5">@quiz.Title</MudText>
+                    </MudCardHeader>
+                    <MudCardMedia Image="@(quiz.ImageUrl ?? "images/no_image.png")" Height="350"/>
+                    <MudCardContent>
+                        @($"{quiz.Description[..Math.Min(quiz.Description.Length, 100)]}{(quiz.Description.Length > 100 ? "..." : "")}")
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Variant="Variant.Text" Color="Color.Primary" Href=@($"PlayQuiz/{quiz.Id}") Size="Size.Large">Play</MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+}
+
+@code {
+    private IEnumerable<Quiz>? _quizzes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _quizzes = await QuizService.GetQuizzes();
+    }
+
+}

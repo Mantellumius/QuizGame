@@ -1,20 +1,25 @@
 @page "/CreateQuiz"
-@using QuizGame.Client.Components.CreateQuiz
-@using QuizGame.Client.Services
 @attribute [Authorize]
 @inject ISnackbar Snackbar
 @inject QuizService QuizService
-@if (_quizId is null)
+
+@if (!_isQuizFormSubmitted)
 {
-    <CreateQuizForm Snackbar="Snackbar" OnSubmit="quizId => _quizId = quizId" QuizService="QuizService"/>
+    <EditQuizForm Snackbar="Snackbar" OnSubmit="OnQuizFormSubmit" QuizService="QuizService"/>
 }
 else
 {
-    <AddQuestions Snackbar="Snackbar" QuizId="_quizId" QuizService="QuizService"/>
+    <SetQuestionsForm Snackbar="Snackbar" QuizId="_quizId" QuizService="QuizService"/>
 }
 
 @code {
 
     private Guid? _quizId;
+    private bool _isQuizFormSubmitted;
 
+    private void OnQuizFormSubmit(Guid? quizId)
+    {
+        _quizId = quizId;
+        _isQuizFormSubmitted = true;
+    }
 }

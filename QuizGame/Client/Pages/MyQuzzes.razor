@@ -1,8 +1,10 @@
-@page "/List"
-@inject HttpClient HttpClient
+@page "/MyQuizzes"
+@attribute [Authorize]
+@inject QuizService QuizService
+@inject NavigationManager NavigationManager
 @if (_quizzes is null)
 {
-    <MudText Typo="Typo.caption">Loading...</MudText>
+    <MudText Typo="Typo.caption" Class="p-4">Loading...</MudText>
 }
 else
 {
@@ -12,7 +14,12 @@ else
             <MudItem xs="3">
                 <MudCard Elevation="4">
                     <MudCardHeader>
-                        <MudText Typo="Typo.h5">@quiz.Title</MudText>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.h5">@quiz.Title</MudText>
+                        </CardHeaderContent>
+                        <CardHeaderActions>
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Info" Size="Size.Medium" OnClick="() => EditQuiz(quiz.Id)"/>
+                        </CardHeaderActions>
                     </MudCardHeader>
                     <MudCardMedia Image="@(quiz.ImageUrl ?? "images/no_image.png")" Height="350"/>
                     <MudCardContent>
@@ -28,11 +35,16 @@ else
 }
 
 @code {
-    private Quiz[]? _quizzes;
+    private IEnumerable<Quiz>? _quizzes;
 
     protected override async Task OnInitializedAsync()
     {
-        _quizzes = await HttpClient.GetFromJsonAsync<Quiz[]>("api/Quizzes");
+        _quizzes = await QuizService.GetQuizzes();
+    }
+
+    private void EditQuiz(Guid quizId)
+    {
+        NavigationManager.NavigateTo($"/EditQuiz/{quizId}");
     }
 
 }

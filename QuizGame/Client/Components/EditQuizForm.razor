@@ -1,9 +1,7 @@
-@using QuizGame.Client.Services
-
 <MudContainer class="d-flex justify-center align-center mt-5">
     <MudCard Elevation="25" Class="w-75">
         <MudCardHeader>
-            <MudText Typo="Typo.h3">Create quiz</MudText>
+            <MudText Typo="Typo.h3">Edit quiz</MudText>
         </MudCardHeader>
         <MudForm Model="@_quiz" @ref="@_form" Validation="@(_quizValidator.ValidateValue)" ValidationDelay="1">
             <MudCardContent>
@@ -27,7 +25,7 @@
         </MudForm>
         <MudCardActions>
             <MudButtonWithProcessing Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto"
-                                     OnClick="@(async () => await Submit())" Text="Submit"/>
+                                     OnClick="@(async () => await Submit())" Text="Continue"/>
         </MudCardActions>
     </MudCard>
 </MudContainer>
@@ -43,20 +41,28 @@
     [Parameter]
     public QuizService QuizService { get; set; } = null!;
 
+    [Parameter]
+    public Quiz? Quiz { get; set; }
+
     private MudForm _form = null!;
     private readonly QuizFluentValidator _quizValidator = new();
-    private readonly Quiz _quiz = new();
+    private Quiz? _quiz;
+
+    protected override void OnInitialized()
+    {
+        _quiz = Quiz ?? new Quiz();
+    }
 
     private async Task Submit()
     {
         await _form.Validate();
         if (!_form.IsValid) return;
-
-        var result = await QuizService.CreateQuiz(_quiz);
+        
+        var result = await QuizService.UpdateOrCreateQuiz(_quiz!);
         if (result.IsSuccessStatusCode)
         {
-            Snackbar?.Add("Submitted!");
-            await OnSubmit.InvokeAsync(_quiz.Id);
+            Snackbar?.Add(Quiz is null ? "Quiz create!" : "Quiz edited!");
+            await OnSubmit.InvokeAsync(_quiz?.Id);
         }
         else
         {

@@ -84,7 +84,7 @@
 </MudContainer>
 
 @code {
-    private List<Question> _questions = new();
+    private List<Question> _questions = null!;
     private Answer _possibleAnswer = new();
     private string[] _errors = { };
     private Question _question = new();
@@ -98,6 +98,14 @@
 
     [Parameter]
     public QuizService QuizService { get; set; } = null!;
+
+    [Parameter]
+    public Quiz? Quiz { get; set; }
+
+    protected override void OnInitialized()
+    {
+        _questions = Quiz?.Questions ?? new List<Question>();
+    }
 
     private void AddPossibleAnswer()
     {
@@ -125,10 +133,10 @@
 
     private async Task SubmitQuestions()
     {
-        var result = await QuizService.AddQuestions(QuizId, _questions);
+        var result = await QuizService.SetQuestions(QuizId, _questions);
         if (result.IsSuccessStatusCode)
         {
-            Snackbar?.Add("Quiz finished!");
+            Snackbar?.Add(Quiz is null ? "Quiz finished!" : "Quiz edited!");
             NavigationManager.NavigateTo("/CreateQuiz/Success");
         }
         else

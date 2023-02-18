@@ -1,4 +1,19 @@
-﻿<MudNavMenu>
-    <MudNavLink Href="/List" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.FormatListBulleted">List</MudNavLink>
-    <MudNavLink Href="/CreateQuiz" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Create">Create</MudNavLink>
+﻿@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<MudNavMenu>
+    <MudNavLink Href="/AllQuizzes" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.FormatListBulleted">Search for quiz</MudNavLink>
+    <MudNavLink Href="/MyQuizzes" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.FormatListBulleted" Disabled="!_isUserAuthenticated">My quzzes</MudNavLink>
+    <MudNavLink Href="/CreateQuiz" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Create" Disabled="!_isUserAuthenticated">Create quiz</MudNavLink>
 </MudNavMenu>
+
+@code{
+
+    private bool _isUserAuthenticated;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        var authenticationState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        _isUserAuthenticated = authenticationState.User.Identity!.IsAuthenticated;
+    }
+
+}
