@@ -1,4 +1,4 @@
-namespace BannerlordUnits.IdentityServer.Data;
+namespace QuizGame.Server.DataAccess;
 
 public static class ConnectionStringBuilder
 {

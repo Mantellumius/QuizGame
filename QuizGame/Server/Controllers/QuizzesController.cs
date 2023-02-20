@@ -5,11 +5,9 @@ namespace QuizGame.Server.Controllers;
 public class QuizzesController : ControllerBase
 {
     private readonly QuizGameDbContext _dbContext;
-    private readonly ILogger<QuizzesController> _logger;
 
-    public QuizzesController(ILogger<QuizzesController> logger, QuizGameDbContext dbContext)
+    public QuizzesController(QuizGameDbContext dbContext)
     {
-        _logger = logger;
         _dbContext = dbContext;
     }
 
@@ -25,21 +23,21 @@ public class QuizzesController : ControllerBase
     {
         var result = await _dbContext.Quizzes.Include(q => q.Questions)!
             .ThenInclude(q => q.Answers)
-            .FirstAsync(x => x.Id == id);
+            .FirstOrDefaultAsync(x => x.Id == id);
         return result is not null ? Results.Ok(result) : Results.NoContent();
     }
 
     [Authorize]
     [HttpPost]
-    public async Task<IResult> Post([FromBody] QuizViewModel quizViewModel)
+    public async Task<IResult> Post([FromBody] QuizDto quizDto)
     {
         var quiz = new Quiz
         {
-            AuthorId = quizViewModel.AuthorId,
-            Id = quizViewModel.Id,
-            Title = quizViewModel.Title,
-            Description = quizViewModel.Description,
-            ImageUrl = quizViewModel.ImageUrl
+            AuthorId = quizDto.AuthorId,
+            Id = quizDto.Id,
+            Title = quizDto.Title,
+            Description = quizDto.Description,
+            ImageUrl = quizDto.ImageUrl
         };
         await _dbContext.Quizzes.AddAsync(quiz);
         await _dbContext.SaveChangesAsync();
@@ -48,13 +46,14 @@ public class QuizzesController : ControllerBase
 
     [Authorize]
     [HttpPut("{id:guid}")]
-    public async Task<IResult> Put(Guid id, [FromBody] QuizViewModel quizViewModel)
+    public async Task<IResult> Put(Guid id, [FromBody] QuizDto quizDto)
     {
         var quiz = await _dbContext.Quizzes.FindAsync(id);
         if (quiz is null) return Results.NoContent();
-        quiz.Title = quizViewModel.Title;
-        quiz.Description = quizViewModel.Description;
-        quiz.ImageUrl = quizViewModel.ImageUrl;
+        quiz.Title = quizDto.Title;
+        quiz.Description = quizDto.Description;
+        quiz.ImageUrl = quizDto.ImageUrl;
+        quiz.Views = quizDto.Views;
         await _dbContext.SaveChangesAsync();
         return Results.Ok(quiz);
     }
@@ -89,6 +88,18 @@ public class QuizzesController : ControllerBase
         var quiz = await _dbContext.Quizzes.FindAsync(id);
         if (quiz is null) return Results.NoContent();
         quiz.Questions = questions;
+        _dbContext.Quizzes.Update(quiz);
+        await _dbContext.SaveChangesAsync();
+        return Results.Ok(quiz);
+    }
+
+    [Authorize]
+    [HttpPut("{id:guid}/AddView")]
+    public async Task<IResult> AddView(Guid id)
+    {
+        var quiz = await _dbContext.Quizzes.FindAsync(id);
+        if (quiz is null) return Results.NoContent();
+        quiz.Views++;
         _dbContext.Quizzes.Update(quiz);
         await _dbContext.SaveChangesAsync();
         return Results.Ok(quiz);

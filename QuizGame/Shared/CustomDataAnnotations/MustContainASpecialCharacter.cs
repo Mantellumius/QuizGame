@@ -1,8 +1,6 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace Shared.CustomDataAnnotations;
+namespace QuizGame.Shared.CustomDataAnnotations;
 
 public sealed class MustContainASpecialCharacter : ValidationAttribute
 {

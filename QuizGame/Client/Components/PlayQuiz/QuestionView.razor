@@ -23,21 +23,23 @@
     public EventCallback<bool> OnAnswered { get; set; }
 
     private IList<AnswerViewModel> _answers = null!;
-    private bool _answered = false;
+    private bool _answered;
 
-    protected override void OnInitialized()
+    protected override void OnParametersSet()
     {
         _answers = Question.Answers
             .Select(AnswerViewModel.CreateFromModel)
             .ToList()
             .Shuffle();
+        _answered = false;
     }
 
-    private void OnAnswerSelected(AnswerViewModel answerViewModel)
+    private async Task OnAnswerSelected(AnswerViewModel answerViewModel)
     {
         answerViewModel.IsSelected = true;
         _answered = true;
-        OnAnswered.InvokeAsync(answerViewModel.IsCorrect);
+        await Task.Delay(1000);
+        await OnAnswered.InvokeAsync(answerViewModel.IsCorrect);
     }
 
     private Color GetButtonColor(AnswerViewModel answerViewModel)

@@ -36,7 +36,7 @@
     public ISnackbar? Snackbar { get; set; }
 
     [Parameter]
-    public EventCallback<Guid?> OnSubmit { get; set; }
+    public EventCallback<Guid> OnSubmit { get; set; }
 
     [Parameter]
     public QuizService QuizService { get; set; } = null!;
@@ -62,7 +62,7 @@
         if (result.IsSuccessStatusCode)
         {
             Snackbar?.Add(Quiz is null ? "Quiz create!" : "Quiz edited!");
-            await OnSubmit.InvokeAsync(_quiz?.Id);
+            await OnSubmit.InvokeAsync(_quiz!.Id);
         }
         else
         {

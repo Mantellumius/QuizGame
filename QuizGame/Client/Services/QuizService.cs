@@ -22,16 +22,16 @@ public class QuizService
         Init();
     }
 
-    private async Task Init()
-    {
-        var jsonWebToken = await _localStorageService.GetItemAsync<string>("bearerToken");
-        if (jsonWebToken is null) return;
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", jsonWebToken);
-    }
-
     public async Task<IEnumerable<Quiz>?> GetQuizzes()
     {
         return await _httpClient.GetFromJsonAsync<Quiz[]>("api/Quizzes");
+    }
+
+    public async Task<Quiz?> GetQuiz(string id)
+    {
+        var success = Guid.TryParse(id, out var guid);
+        if (!success) return null;
+        return await _httpClient.GetFromJsonAsync<Quiz>($"api/Quizzes/{guid}");
     }
 
     public async Task<HttpResponseMessage> UpdateOrCreateQuiz(Quiz quiz)
@@ -53,13 +53,21 @@ public class QuizService
         return await _httpClient.PostAsJsonAsync("/api/Quizzes", quiz);
     }
 
-    public async Task<HttpResponseMessage> SetQuestions(Guid? quizId, List<Question> questions)
+    public async Task<HttpResponseMessage> SetQuestions(Guid quizId, List<Question> questions)
     {
         return await _httpClient.PutAsJsonAsync($"/api/Quizzes/{quizId}/SetQuestions", questions);
     }
 
-    public async Task<Quiz?> GetQuiz(string id)
+    public async Task<HttpResponseMessage> AddView(Guid quizId, Quiz quiz)
     {
-        return await _httpClient.GetFromJsonAsync<Quiz>($"api/Quizzes/{id}");
+        quiz.Views++;
+        return await _httpClient.PutAsJsonAsync($"/api/Quizzes/{quizId}/AddView", quiz);
+    }
+
+    private async Task Init()
+    {
+        var jsonWebToken = await _localStorageService.GetItemAsync<string>("bearerToken");
+        if (jsonWebToken is null) return;
+        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", jsonWebToken);
     }
 }

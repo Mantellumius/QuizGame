@@ -26,7 +26,10 @@ else
                         @($"{quiz.Description[..Math.Min(quiz.Description.Length, 100)]}{(quiz.Description.Length > 100 ? "..." : "")}")
                     </MudCardContent>
                     <MudCardActions>
-                        <MudButton Variant="Variant.Text" Color="Color.Primary" Href=@($"PlayQuiz/{quiz.Id}") Size="Size.Large">Play</MudButton>
+                        <MudStack Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Row="true" class="w-100">
+                            <MudButton Variant="Variant.Text" Color="Color.Primary" Href=@($"PlayQuiz/{quiz.Id}") Size="Size.Large">Play</MudButton>
+                            <MudText class="p-1">@quiz.Views Views</MudText>
+                        </MudStack>
                     </MudCardActions>
                 </MudCard>
             </MudItem>

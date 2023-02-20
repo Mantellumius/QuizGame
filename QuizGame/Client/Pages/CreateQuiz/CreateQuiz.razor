@@ -14,10 +14,10 @@ else
 
 @code {
 
-    private Guid? _quizId;
+    private Guid _quizId;
     private bool _isQuizFormSubmitted;
 
-    private void OnQuizFormSubmit(Guid? quizId)
+    private void OnQuizFormSubmit(Guid quizId)
     {
         _quizId = quizId;
         _isQuizFormSubmitted = true;

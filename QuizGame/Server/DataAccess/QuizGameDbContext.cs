@@ -6,5 +6,5 @@ public class QuizGameDbContext : DbContext
     {
     }
 
-    public DbSet<Quiz> Quizzes { get; set; }
+    public DbSet<Quiz> Quizzes { get; set; } = null!;
 }

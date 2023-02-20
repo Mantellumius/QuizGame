@@ -1,57 +1,68 @@
 @page "/PlayQuiz/{Id}"
 @using QuizGame.Client.Components.PlayQuiz
-@inject HttpClient HttpClient
+@inject QuizService QuizService
 @inject ISnackbar Snackbar;
-@if (_quiz is null)
+@if (_isErrorOccured)
 {
-    <MudText>Loading...</MudText>
+    <MudText Typo="Typo.h5" Color="Color.Error" class="p-5">Error</MudText>
 }
 else
 {
-    <MudContainer Class="d-flex justify-center align-center mt-5">
-        <MudStack AlignItems="AlignItems.Center">
-            <MudText Typo="Typo.h3">@_quiz.Title</MudText>
-            <MudSpacer/>
-            @if (_isFinished)
-            {
-                <QuizResult TotalQuestions="_quiz.Questions!.Count" TotalCorrectAnswers="_correctAnswersCount"/>
-            }
-            else
-            {
-                <QuestionView Question="@_questionsEnumerator?.Current" OnAnswered="OnAnswered"/>
-            }
-        </MudStack>
-    </MudContainer>
+    if (_quiz is null)
+    {
+        <MudText Typo="Typo.h5" class="p-5">Loading...</MudText>
+    }
+    else
+    {
+        <MudContainer Class="d-flex justify-center align-center mt-5">
+            <MudStack AlignItems="AlignItems.Center">
+                <MudText Typo="Typo.h3">@_quiz.Title</MudText>
+                <MudSpacer/>
+                @if (_isFinished)
+                {
+                    <QuizResult TotalQuestions="_quiz.Questions!.Count" TotalCorrectAnswers="_correctAnswersCount"/>
+                }
+                else
+                {
+                    <QuestionView Question="@_currentQuestion" OnAnswered="OnAnswered"/>
+                }
+            </MudStack>
+        </MudContainer>
+    }
 }
 
 @code {
 
     [Parameter]
-    public string Id { get; set; }
+    public string Id { get; set; } = null!;
 
+    private Question _currentQuestion = null!;
     private Quiz? _quiz;
     private IEnumerator<Question>? _questionsEnumerator;
     private bool _isFinished;
     private int _correctAnswersCount;
+    private bool _isErrorOccured = false;
 
     protected override async Task OnInitializedAsync()
     {
-        _quiz = await HttpClient.GetFromJsonAsync<Quiz>($"api/Quizzes/{new Guid(Id)}");
+        _quiz = await QuizService.GetQuiz(Id);
         if (_quiz is null)
         {
             Snackbar.Add("Unknown quiz");
+            _isErrorOccured = true;
             return;
         }
         _questionsEnumerator = _quiz.Questions?.GetEnumerator()!;
         _questionsEnumerator.MoveNext();
+        _currentQuestion = _questionsEnumerator.Current;
+        await QuizService.AddView(Guid.Parse(Id), _quiz);
     }
 
-    private async void OnAnswered(bool isCorrectAnswer)
+    private void OnAnswered(bool isCorrectAnswer)
     {
-        await Task.Delay(1000);
         if (isCorrectAnswer) _correctAnswersCount++;
         if (!_questionsEnumerator!.MoveNext()) _isFinished = true;
-        StateHasChanged();
+        _currentQuestion = _questionsEnumerator.Current;
     }
 
 }
